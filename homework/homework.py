@@ -108,9 +108,9 @@ from sklearn.decomposition import PCA
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder,StandardScaler
 from sklearn.feature_selection import f_classif,SelectKBest
-from sklearn.svm import SVC
 from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import make_scorer, balanced_accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
+from sklearn.neural_network import MLPClassifier
 
 test_data = pd.read_csv(
     "files/input/test_data.csv.zip",
@@ -158,15 +158,17 @@ pipeline=Pipeline(
         ("preprocessor",preprocessor),
         ('pca',PCA()),
         ('feature_selection',SelectKBest(score_func=f_classif)),
-        ('classifier', SVC(kernel="rbf",random_state=12345,max_iter=-1))
+        ("classifier", MLPClassifier(random_state=12345, max_iter=1000))
     ]
 )
 
 param_grid = {
-    'pca__n_components':[20,x_train.shape[1]-2],
+    'pca__n_components':[20, x_train.shape[1]-2],
     'feature_selection__k':[12],
-    'classifier__kernel': ['rbf'],
-    'classifier__gamma': [0.1],
+    'classifier__hidden_layer_sizes': [(5,), (10,), (5, 5)],
+    'classifier__activation': ['relu', 'tanh'],
+    'classifier__solver': ['adam', 'sgd'],
+    'classifier__alpha': [0.0001, 0.001],
 }
 
 model=GridSearchCV(
